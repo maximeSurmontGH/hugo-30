@@ -1,0 +1,157 @@
+:root {
+  --bg: #f7f7f7;
+  --surface: #ffffff;
+  --surface-strong: #f3f3f3;
+  --text: #222;
+  --text-muted: #656565;
+  --accent: #1a1a1a;
+  --shadow: rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #ffffff, #e5e5e5 70%);
+  color: var(--text);
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.app {
+  width: min(960px, 100%);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 22px 20px;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: 0 18px 50px var(--shadow);
+}
+
+.menu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.menu-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-size: 0.98rem;
+}
+
+.game-panel {
+  position: relative;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 18px;
+  box-shadow: 0 22px 50px var(--shadow);
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+canvas {
+  width: 100%;
+  border-radius: 18px;
+  background: #f3f3f3;
+  image-rendering: crisp-edges;
+  touch-action: manipulation;
+}
+
+.instructions {
+  margin-top: 14px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(22, 22, 22, 0.45);
+  border-radius: 28px;
+  pointer-events: auto;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-card {
+  width: min(420px, 90%);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.16);
+}
+
+.overlay-card h2 {
+  margin: 0 0 10px;
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+}
+
+.overlay-card p {
+  margin: 0 0 22px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.overlay-card button {
+  width: 100%;
+  padding: 14px 0;
+  border: none;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 12px;
+  }
+
+  .menu, .game-panel {
+    padding: 16px;
+  }
+
+  .menu-badge {
+    font-size: 1rem;
+  }
+}

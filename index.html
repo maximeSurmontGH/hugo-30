@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Épreuve des 30</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <section class="game-panel">
+      <div class="hud">
+        <span id="score">Score: 0</span>
+        <span id="target">Objectif: 3000</span>
+      </div>
+      <canvas id="gameCanvas" width="800" height="200"></canvas>
+      <div class="instructions">Tapotez l’écran ou utilisez Espace / Flèche haut.</div>
+    </section>
+
+    <div id="overlay" class="overlay">
+      <div class="overlay-card">
+        <h2 id="overlay-title">Comme d'hab tu n'arriveras pas à tenir 30s !</h2>
+        <p id="overlay-text">Appuyez sur Jouer pour démarrer.</p>
+        <button id="startBtn">Jouer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
