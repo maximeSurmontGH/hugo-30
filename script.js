@@ -58,14 +58,19 @@ let state = {
   },
 };
 
-const getCanvasWidth = () => Math.min(860, window.innerWidth - 16);
-const getCanvasHeight = () => 180;
+const getCanvasWidth = () => Math.min(860, document.body.clientWidth - 32);
+const getCanvasHeight = () => {
+  const width = getCanvasWidth();
+  return Math.min(200, Math.max(150, Math.round(width * 0.24)));
+};
 
 function setupCanvas() {
-  canvas.width = getCanvasWidth() * window.devicePixelRatio;
-  canvas.height = getCanvasHeight() * window.devicePixelRatio;
-  canvas.style.height = `${getCanvasHeight()}px`;
-  canvas.style.width = `${getCanvasWidth()}px`;
+  const width = getCanvasWidth();
+  const height = getCanvasHeight();
+  canvas.width = width * window.devicePixelRatio;
+  canvas.height = height * window.devicePixelRatio;
+  canvas.style.width = '100%';
+  canvas.style.height = `${height}px`;
   ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
 }
 
@@ -101,7 +106,7 @@ function resetGame() {
   state.obstacles = [];
   state.clouds = [{ x: 280, y: 30 }, { x: 520, y: 45 }];
   state.nextObstacleAt = 1200;
-  state.dino.y = 92;
+  state.dino.y = getCanvasHeight() - 24 - state.dino.height;
   state.dino.velY = 0;
   state.dino.grounded = true;
   state.dino.frameIndex = 0;
@@ -139,9 +144,10 @@ function endGame(victory) {
 function spawnObstacle() {
   const height = 28 + Math.random() * 34;
   const width = 18 + Math.random() * 16;
+  const groundY = getCanvasHeight() - 24;
   state.obstacles.push({
     x: getCanvasWidth() + 20,
-    y: getCanvasHeight() - 30 - height,
+    y: groundY - height,
     width,
     height,
   });
@@ -204,8 +210,9 @@ function update(seconds) {
 
   state.dino.velY += state.dino.gravity * delta;
   state.dino.y += state.dino.velY * delta;
-  if (state.dino.y >= 92) {
-    state.dino.y = 92;
+  const groundY = getCanvasHeight() - 24;
+  if (state.dino.y >= groundY - state.dino.height) {
+    state.dino.y = groundY - state.dino.height;
     state.dino.velY = 0;
     state.dino.grounded = true;
   }
