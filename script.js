@@ -106,8 +106,8 @@ function resetGame() {
   state.dino.grounded = true;
   state.dino.frameIndex = 0;
   state.dino.frameTime = 0;
-  overlayTitle.textContent = "Comme d'hab, tu n'arriveras pas à tenir 30s !";
-  overlayText.textContent = 'Montre nous que tu tiens plus que ton âge.';
+  overlayTitle.textContent = "Go Go Hugo !";
+  overlayText.textContent = "Comme d'hab, tu n'arriveras pas à tenir 30s ! Montre nous que tu tiens plus que ton âge.";
   startBtn.textContent = 'Jouer';
   overlay.classList.remove('hidden');
   drawFrame();
@@ -127,10 +127,10 @@ function endGame(victory) {
   overlay.classList.remove('hidden');
   if (victory) {
     overlayTitle.textContent = 'Félicitations !';
-    overlayText.textContent = `Lettre secrète le "O". Score final : ${Math.floor(state.score)}`;
+    overlayText.textContent = `La lettre secrète est le "O" !`;
     startBtn.textContent = 'Rejouer';
   } else {
-    overlayTitle.textContent = 'T-Rex écrasé';
+    overlayTitle.textContent = 'Oh non, Hugo s\'est fait poutrer !';
     overlayText.textContent = `Score final : ${Math.floor(state.score)}. Appuyez pour recommencer.`;
     startBtn.textContent = 'Recommencer';
   }
@@ -283,8 +283,48 @@ function drawObstacles() {
   ctx.fillStyle = '#333';
   state.obstacles.forEach((obs) => {
     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-    ctx.fillRect(obs.x + 4, obs.y - 6, 6, 6);
-    ctx.fillRect(obs.x + obs.width - 12, obs.y - 10, 6, 10);
+
+    const baseSquareSize = 20;
+    const baseSquareY = obs.y + obs.height - baseSquareSize;
+    const drawRoundedRect = (rx, ry, rw, rh, rr) => {
+      const r = Math.min(rr, rw / 2, rh / 2);
+      ctx.beginPath();
+      ctx.moveTo(rx + r, ry);
+      ctx.lineTo(rx + rw - r, ry);
+      ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + r);
+      ctx.lineTo(rx + rw, ry + rh);
+      ctx.lineTo(rx, ry + rh);
+      ctx.lineTo(rx, ry + r);
+      ctx.quadraticCurveTo(rx, ry, rx + r, ry);
+      ctx.closePath();
+      ctx.fill();
+    };
+    const baseRadius = 6;
+    drawRoundedRect(obs.x - 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
+    drawRoundedRect(obs.x + obs.width - baseSquareSize + 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
+
+    const topSquareSize = obs.width + 8;
+    const topSquareX = obs.x - 4;
+    const topSquareY = obs.y - topSquareSize + 20;
+    const topSquareW = topSquareSize;
+    const topSquareH = topSquareSize - topSquareSize * 0.3;
+    // Dessiner un rectangle dont les coins supérieurs sont arrondis
+    const radius = Math.min(8, topSquareH / 2, topSquareW / 2);
+    ctx.beginPath();
+    // gauche bord bas -> monter jusqu'au début du coin arrondi
+    ctx.moveTo(topSquareX, topSquareY + radius);
+    // coin supérieur gauche arrondi
+    ctx.quadraticCurveTo(topSquareX, topSquareY, topSquareX + radius, topSquareY);
+    // bord supérieur droit (avant coin)
+    ctx.lineTo(topSquareX + topSquareW - radius, topSquareY);
+    // coin supérieur droit arrondi
+    ctx.quadraticCurveTo(topSquareX + topSquareW, topSquareY, topSquareX + topSquareW, topSquareY + radius);
+    // descendre jusqu'à la base droite (coins inférieurs droits carrés)
+    ctx.lineTo(topSquareX + topSquareW, topSquareY + topSquareH);
+    // base droite -> base gauche (base droite et gauche restent droites)
+    ctx.lineTo(topSquareX, topSquareY + topSquareH);
+    ctx.closePath();
+    ctx.fill();
   });
 }
 
