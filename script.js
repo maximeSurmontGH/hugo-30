@@ -8,10 +8,8 @@ const overlayText = document.getElementById('overlay-text');
 const startBtn = document.getElementById('startBtn');
 const difficultyLabel = document.getElementById('difficulty');
 const difficultyMenu = document.getElementById('difficultyMenu');
-const easyBtn = document.getElementById('easyBtn');
-const hardBtn = document.getElementById('hardBtn');
+const difficultySwitch = document.getElementById('difficultySwitch');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
-const modeFeedback = document.getElementById('modeFeedback');
 
 const sprite = new Image();
 sprite.src = 'sprit.png';
@@ -145,12 +143,6 @@ async function toggleFullscreen() {
   }
 }
 
-function setModeFeedback(message, warning = false) {
-  if (!modeFeedback) return;
-  modeFeedback.textContent = message;
-  modeFeedback.classList.toggle('warning', warning);
-}
-
 function maybeShowDifficultyMenu() {
   if (!difficultyMenu) return;
   if (state.attempts >= 3) {
@@ -161,15 +153,11 @@ function maybeShowDifficultyMenu() {
 }
 
 function handleDifficultySelection(choice) {
-  if (choice === 'easy' && state.easyRequestCount === 0) {
-    state.easyRequestCount += 1;
-    setModeFeedback('Haha ptit zizi, 🤏 🤏 🤏 !', true);
-    state.mode = 'difficult';
-  } else {
-    state.mode = choice;
-    setModeFeedback(choice === 'easy' ? 'Mode facile activé.' : 'Mode difficile activé.', false);
-  }
+  state.mode = choice;
   updateDifficultyLabel();
+  if (difficultySwitch) {
+    difficultySwitch.checked = state.mode === 'easy';
+  }
 }
 
 function resetGame() {
@@ -192,6 +180,9 @@ function resetGame() {
   startBtn.textContent = 'Jouer';
   overlay.classList.remove('hidden');
   updateDifficultyLabel();
+  if (difficultySwitch) {
+    difficultySwitch.checked = state.mode === 'easy';
+  }
   maybeShowDifficultyMenu();
   drawFrame();
 }
@@ -210,6 +201,9 @@ function endGame(victory) {
   state.attempts += 1;
   overlay.classList.remove('hidden');
   updateDifficultyLabel();
+  if (difficultySwitch) {
+    difficultySwitch.checked = state.mode === 'easy';
+  }
   maybeShowDifficultyMenu();
   if (victory) {
     overlayTitle.textContent = 'Félicitations !';
@@ -436,16 +430,21 @@ function drawObstacles(theme) {
       return;
     }
 
-    ctx.fillStyle = theme.obstacle;
+    const easyMode = state.mode === 'easy';
+    const bodyColor = easyMode ? '#ff8ac2' : theme.obstacle;
+    const baseColor = easyMode ? '#ff5ea1' : theme.obstacleAccent;
+    const topColor = easyMode ? '#ff3b48' : theme.obstacle;
+
+    ctx.fillStyle = bodyColor;
     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
     const baseSquareSize = 20;
     const baseSquareY = obs.y + obs.height - baseSquareSize;
     const baseRadius = 6;
-    ctx.fillStyle = theme.obstacleAccent;
+    ctx.fillStyle = baseColor;
     drawRoundedRect(obs.x - 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
     drawRoundedRect(obs.x + obs.width - baseSquareSize + 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
-    ctx.fillStyle = theme.obstacle;
+    ctx.fillStyle = topColor;
 
     const topSquareSize = obs.width + 8;
     const topSquareX = obs.x - 4;
@@ -512,8 +511,9 @@ startBtn.addEventListener('click', () => {
   startGame();
 });
 
-easyBtn.addEventListener('click', () => handleDifficultySelection('easy'));
-hardBtn.addEventListener('click', () => handleDifficultySelection('difficult'));
+if (difficultySwitch) {
+  difficultySwitch.addEventListener('change', () => handleDifficultySelection(difficultySwitch.checked ? 'easy' : 'difficult'));
+}
 if (fullscreenBtn) {
   fullscreenBtn.addEventListener('click', toggleFullscreen);
 }

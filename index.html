@@ -25,14 +25,17 @@
         <div class="overlay-body">
           <h2 id="overlay-title">Comme d'hab tu n'arriveras pas à tenir 30s !</h2>
           <p id="overlay-text">Appuyez sur Jouer pour démarrer.</p>
-          <button id="startBtn">Jouer</button>
-          <div id="difficultyMenu" class="difficulty-menu hidden">
-            <p class="difficulty-menu-title">Choisissez la difficulté</p>
-            <div class="difficulty-button-row">
-              <button id="easyBtn" class="mode-btn easy">Facile</button>
-              <button id="hardBtn" class="mode-btn hard">Difficile</button>
+          <div class="action-row">
+            <button id="startBtn">Jouer</button>
+            <div id="difficultyMenu" class="difficulty-menu hidden">
+              <div class="difficulty-switch-row">
+                <label class="switch">
+                  <input id="difficultySwitch" type="checkbox" aria-label="Activer le mode facile">
+                  <span class="slider"></span>
+                </label>
+                <span class="switch-label">Mode facile</span>
+              </div>
             </div>
-            <p id="modeFeedback" class="mode-feedback"></p>
           </div>
         </div>
       </div>
