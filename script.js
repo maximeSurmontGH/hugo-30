@@ -11,9 +11,10 @@ const difficultyMenu = document.getElementById('difficultyMenu');
 const difficultySwitch = document.getElementById('difficultySwitch');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 
+const DEFAULT_RETRY_BEFORE_EASY = 3;
 const sprite = new Image();
 sprite.src = 'sprit.png';
-sprite.onload = () => drawFrame();
+sprite.onload = drawFrame;
 
 function getTheme() {
   return {
@@ -30,7 +31,10 @@ function getTheme() {
   };
 }
 
-let env = { TARGET_SCORE: 30 };
+const env = {
+  TARGET_SCORE: 30,
+  RETRY_COUNT: DEFAULT_RETRY_BEFORE_EASY,
+};
 let state = {
   running: false,
   gameOver: false,
@@ -77,7 +81,6 @@ let state = {
   },
   attempts: 0,
   mode: 'difficult',
-  easyRequestCount: 0,
 };
 
 const getCanvasWidth = () => Math.min(860, document.body.clientWidth - 32);
@@ -105,6 +108,7 @@ function parseEnv(data) {
     if (key && value) env[key.trim()] = value.trim();
   });
   env.TARGET_SCORE = Number(env.TARGET_SCORE) || 3000;
+  env.RETRY_COUNT = Number(env.RETRY_COUNT) || DEFAULT_RETRY_BEFORE_EASY;
 }
 
 async function loadEnv() {
@@ -115,6 +119,7 @@ async function loadEnv() {
     parseEnv(text);
   } catch (error) {
     console.warn('Impossible de charger .env, valeur par défaut utilisée.');
+    parseEnv('');
   }
   targetLabel.textContent = `Objectif: ${env.TARGET_SCORE}`;
 }
@@ -145,7 +150,8 @@ async function toggleFullscreen() {
 
 function maybeShowDifficultyMenu() {
   if (!difficultyMenu) return;
-  if (state.attempts >= 3) {
+  const retryCount = Number(env.RETRY_COUNT) || DEFAULT_RETRY_BEFORE_EASY;
+  if (state.attempts >= retryCount) {
     difficultyMenu.classList.remove('hidden');
   } else {
     difficultyMenu.classList.add('hidden');
