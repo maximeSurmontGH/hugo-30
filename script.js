@@ -10,6 +10,7 @@ const difficultyLabel = document.getElementById('difficulty');
 const difficultyMenu = document.getElementById('difficultyMenu');
 const easyBtn = document.getElementById('easyBtn');
 const hardBtn = document.getElementById('hardBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
 const modeFeedback = document.getElementById('modeFeedback');
 
 const sprite = new Image();
@@ -123,6 +124,25 @@ async function loadEnv() {
 function updateDifficultyLabel() {
   if (!difficultyLabel) return;
   difficultyLabel.textContent = `Mode: ${state.mode === 'easy' ? 'facile' : 'difficile'}`;
+}
+
+function updateFullscreenLabel() {
+  if (!fullscreenBtn) return;
+  const isFullscreen = Boolean(document.fullscreenElement);
+  fullscreenBtn.textContent = isFullscreen ? 'Quitter plein écran' : 'Plein écran';
+}
+
+async function toggleFullscreen() {
+  if (!fullscreenBtn) return;
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  } catch (error) {
+    console.warn('Impossible de basculer en plein écran.', error);
+  }
 }
 
 function setModeFeedback(message, warning = false) {
@@ -494,9 +514,18 @@ startBtn.addEventListener('click', () => {
 
 easyBtn.addEventListener('click', () => handleDifficultySelection('easy'));
 hardBtn.addEventListener('click', () => handleDifficultySelection('difficult'));
+if (fullscreenBtn) {
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+}
+window.addEventListener('fullscreenchange', () => {
+  updateFullscreenLabel();
+  setupCanvas();
+  drawFrame();
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupCanvas();
   await loadEnv();
+  updateFullscreenLabel();
   resetGame();
 });
