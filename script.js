@@ -520,6 +520,12 @@ if (gamePanel) {
     jump();
   });
 }
+document.body.addEventListener('pointerdown', (event) => {
+  const target = event.target;
+  if (target.closest('button, input, .hud-button, .overlay-card')) return;
+  if (document.getElementById('overlay') && !document.getElementById('overlay').classList.contains('hidden')) return;
+  jump();
+});
 startBtn.addEventListener('click', () => {
   if (state.gameOver || state.victory) resetGame();
   startGame();
