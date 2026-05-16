@@ -158,15 +158,32 @@ function endGame(victory) {
 }
 
 function spawnObstacle() {
-  const height = 28 + Math.random() * 34;
-  const width = 18 + Math.random() * 16;
   const groundY = getCanvasHeight() - 24;
-  state.obstacles.push({
-    x: getCanvasWidth() + 20,
-    y: groundY - height,
-    width,
-    height,
-  });
+  const isBird = state.score >= 10 && Math.random() < 0.56;
+
+  if (isBird) {
+    const height = 22;
+    const width = 36;
+    const y = groundY - 90 - Math.random() * 40;
+    state.obstacles.push({
+      x: getCanvasWidth() + 20,
+      y,
+      width,
+      height,
+      type: 'bird',
+    });
+  } else {
+    const height = 28 + Math.random() * 34;
+    const width = 18 + Math.random() * 16;
+    state.obstacles.push({
+      x: getCanvasWidth() + 20,
+      y: groundY - height,
+      width,
+      height,
+      type: 'block',
+    });
+  }
+
   const gapReduction = Math.min(state.score * 8, 320);
   const minGap = 40;
   const gap = Math.max(minGap, 1000 - gapReduction + Math.random() * 360);
@@ -327,8 +344,28 @@ function drawRoundedRect(rx, ry, rw, rh, rr) {
 }
 
 function drawObstacles(theme) {
-  ctx.fillStyle = theme.obstacle;
   state.obstacles.forEach((obs) => {
+    if (obs.type === 'bird') {
+      const y = obs.y;
+      ctx.fillStyle = theme.obstacleAccent;
+      ctx.beginPath();
+      ctx.arc(obs.x + obs.width * 0.25, y + obs.height * 0.4, 6, 0, Math.PI * 2);
+      ctx.arc(obs.x + obs.width * 0.75, y + obs.height * 0.4, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = theme.obstacle;
+      ctx.beginPath();
+      ctx.moveTo(obs.x + 4, y + obs.height * 0.5);
+      ctx.quadraticCurveTo(obs.x + obs.width * 0.25, y + obs.height * 0.1, obs.x + obs.width * 0.5, y + obs.height * 0.5);
+      ctx.quadraticCurveTo(obs.x + obs.width * 0.75, y + obs.height * 0.9, obs.x + obs.width - 4, y + obs.height * 0.5);
+      ctx.lineTo(obs.x + obs.width * 0.75, y + obs.height * 0.45);
+      ctx.quadraticCurveTo(obs.x + obs.width * 0.65, y + obs.height * 0.15, obs.x + obs.width * 0.5, y + obs.height * 0.35);
+      ctx.quadraticCurveTo(obs.x + obs.width * 0.35, y + obs.height * 0.15, obs.x + obs.width * 0.25, y + obs.height * 0.45);
+      ctx.closePath();
+      ctx.fill();
+      return;
+    }
+
+    ctx.fillStyle = theme.obstacle;
     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
     const baseSquareSize = 20;
