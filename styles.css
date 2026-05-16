@@ -88,21 +88,29 @@ canvas {
 }
 
 .overlay-card {
-  width: min(420px, 90%);
+  width: min(760px, 90%);
+  max-height: min(90vh, 680px);
   background: var(--surface);
   border-radius: 24px;
   padding: 28px 24px;
   text-align: center;
+  display: grid;
+  gap: 18px;
+  align-items: center;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.16);
+  overflow: auto;
 }
 
 .overlay-image {
   width: 150px;
   height: 150px;
-  margin-bottom: 16px;
+  margin: 0 auto;
   display: block;
-  margin-left: auto;
-  margin-right: auto;
+}
+
+.overlay-body {
+  display: grid;
+  gap: 18px;
 }
 
 .overlay-card h2 {
@@ -238,5 +246,28 @@ canvas {
 
   .instructions {
     font-size: 0.92rem;
+  }
+}
+
+@media (min-width: 720px) {
+  .overlay-card {
+    grid-template-columns: 170px 1fr;
+    text-align: left;
+  }
+
+  .overlay-image {
+    width: 170px;
+    height: 170px;
+    margin: 0;
+  }
+
+  .overlay-body {
+    padding-left: 8px;
+  }
+
+  .overlay-card button {
+    width: auto;
+    min-width: 180px;
+    justify-self: start;
   }
 }
