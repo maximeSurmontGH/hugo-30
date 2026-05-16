@@ -26,10 +26,6 @@ function getTheme() {
   };
 }
 
-function updateTheme() {
-  // kept for API compatibility; no global neon theme anymore
-}
-
 let env = { TARGET_SCORE: 30 };
 let state = {
   running: false,
@@ -97,7 +93,8 @@ function parseEnv(data) {
   data.split('\n').forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) return;
-    const [key, value] = trimmed.split('=');
+    const [key, ...valueParts] = trimmed.split('=');
+    const value = valueParts.join('=');
     if (key && value) env[key.trim()] = value.trim();
   });
   env.TARGET_SCORE = Number(env.TARGET_SCORE) || 3000;
@@ -199,7 +196,6 @@ function loop(timestamp) {
 
 function update(seconds) {
   state.score += seconds;
-  updateTheme();
   const delta = seconds * 60;
   state.distance += state.speed * delta;
   const speedBoost = Math.min(Math.floor(state.score * 0.55), 10);
@@ -316,6 +312,20 @@ function drawClouds(theme) {
   });
 }
 
+function drawRoundedRect(rx, ry, rw, rh, rr) {
+  const r = Math.min(rr, rw / 2, rh / 2);
+  ctx.beginPath();
+  ctx.moveTo(rx + r, ry);
+  ctx.lineTo(rx + rw - r, ry);
+  ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + r);
+  ctx.lineTo(rx + rw, ry + rh);
+  ctx.lineTo(rx, ry + rh);
+  ctx.lineTo(rx, ry + r);
+  ctx.quadraticCurveTo(rx, ry, rx + r, ry);
+  ctx.closePath();
+  ctx.fill();
+}
+
 function drawObstacles(theme) {
   ctx.fillStyle = theme.obstacle;
   state.obstacles.forEach((obs) => {
@@ -323,19 +333,6 @@ function drawObstacles(theme) {
 
     const baseSquareSize = 20;
     const baseSquareY = obs.y + obs.height - baseSquareSize;
-    const drawRoundedRect = (rx, ry, rw, rh, rr) => {
-      const r = Math.min(rr, rw / 2, rh / 2);
-      ctx.beginPath();
-      ctx.moveTo(rx + r, ry);
-      ctx.lineTo(rx + rw - r, ry);
-      ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + r);
-      ctx.lineTo(rx + rw, ry + rh);
-      ctx.lineTo(rx, ry + rh);
-      ctx.lineTo(rx, ry + r);
-      ctx.quadraticCurveTo(rx, ry, rx + r, ry);
-      ctx.closePath();
-      ctx.fill();
-    };
     const baseRadius = 6;
     ctx.fillStyle = theme.obstacleAccent;
     drawRoundedRect(obs.x - 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
@@ -347,20 +344,13 @@ function drawObstacles(theme) {
     const topSquareY = obs.y - topSquareSize + 20;
     const topSquareW = topSquareSize;
     const topSquareH = topSquareSize - topSquareSize * 0.3;
-    // Dessiner un rectangle dont les coins supérieurs sont arrondis
     const radius = Math.min(8, topSquareH / 2, topSquareW / 2);
     ctx.beginPath();
-    // gauche bord bas -> monter jusqu'au début du coin arrondi
     ctx.moveTo(topSquareX, topSquareY + radius);
-    // coin supérieur gauche arrondi
     ctx.quadraticCurveTo(topSquareX, topSquareY, topSquareX + radius, topSquareY);
-    // bord supérieur droit (avant coin)
     ctx.lineTo(topSquareX + topSquareW - radius, topSquareY);
-    // coin supérieur droit arrondi
     ctx.quadraticCurveTo(topSquareX + topSquareW, topSquareY, topSquareX + topSquareW, topSquareY + radius);
-    // descendre jusqu'à la base droite (coins inférieurs droits carrés)
     ctx.lineTo(topSquareX + topSquareW, topSquareY + topSquareH);
-    // base droite -> base gauche (base droite et gauche restent droites)
     ctx.lineTo(topSquareX, topSquareY + topSquareH);
     ctx.closePath();
     ctx.fill();
