@@ -12,6 +12,7 @@
       <div class="hud">
         <span id="score">Score: 0</span>
         <span id="target">Objectif: 3000</span>
+        <span id="difficulty">Mode: difficile</span>
       </div>
       <canvas id="gameCanvas" width="800" height="200"></canvas>
       <div class="instructions">Tapotez l’écran ou utilisez Espace / Flèche haut.</div>
@@ -23,6 +24,14 @@
         <h2 id="overlay-title">Comme d'hab tu n'arriveras pas à tenir 30s !</h2>
         <p id="overlay-text">Appuyez sur Jouer pour démarrer.</p>
         <button id="startBtn">Jouer</button>
+        <div id="difficultyMenu" class="difficulty-menu hidden">
+          <p class="difficulty-menu-title">Choisissez la difficulté</p>
+          <div class="difficulty-button-row">
+            <button id="easyBtn" class="mode-btn easy">Facile</button>
+            <button id="hardBtn" class="mode-btn hard">Difficile</button>
+          </div>
+          <p id="modeFeedback" class="mode-feedback"></p>
+        </div>
       </div>
     </div>
   </div>

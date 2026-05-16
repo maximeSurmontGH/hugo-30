@@ -6,6 +6,11 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayText = document.getElementById('overlay-text');
 const startBtn = document.getElementById('startBtn');
+const difficultyLabel = document.getElementById('difficulty');
+const difficultyMenu = document.getElementById('difficultyMenu');
+const easyBtn = document.getElementById('easyBtn');
+const hardBtn = document.getElementById('hardBtn');
+const modeFeedback = document.getElementById('modeFeedback');
 
 const sprite = new Image();
 sprite.src = 'sprit.png';
@@ -71,6 +76,9 @@ let state = {
       ],
     },
   },
+  attempts: 0,
+  mode: 'difficult',
+  easyRequestCount: 0,
 };
 
 const getCanvasWidth = () => Math.min(860, document.body.clientWidth - 32);
@@ -112,6 +120,38 @@ async function loadEnv() {
   targetLabel.textContent = `Objectif: ${env.TARGET_SCORE}`;
 }
 
+function updateDifficultyLabel() {
+  if (!difficultyLabel) return;
+  difficultyLabel.textContent = `Mode: ${state.mode === 'easy' ? 'facile' : 'difficile'}`;
+}
+
+function setModeFeedback(message, warning = false) {
+  if (!modeFeedback) return;
+  modeFeedback.textContent = message;
+  modeFeedback.classList.toggle('warning', warning);
+}
+
+function maybeShowDifficultyMenu() {
+  if (!difficultyMenu) return;
+  if (state.attempts >= 3) {
+    difficultyMenu.classList.remove('hidden');
+  } else {
+    difficultyMenu.classList.add('hidden');
+  }
+}
+
+function handleDifficultySelection(choice) {
+  if (choice === 'easy' && state.easyRequestCount === 0) {
+    state.easyRequestCount += 1;
+    setModeFeedback('Haha ptit zizi, 🤏 🤏 🤏 !', true);
+    state.mode = 'difficult';
+  } else {
+    state.mode = choice;
+    setModeFeedback(choice === 'easy' ? 'Mode facile activé.' : 'Mode difficile activé.', false);
+  }
+  updateDifficultyLabel();
+}
+
 function resetGame() {
   state.running = false;
   state.gameOver = false;
@@ -131,6 +171,8 @@ function resetGame() {
   overlayText.textContent = "Comme d'hab, tu n'arriveras pas à tenir 30s ! Montre nous que tu tiens plus que ton âge.";
   startBtn.textContent = 'Jouer';
   overlay.classList.remove('hidden');
+  updateDifficultyLabel();
+  maybeShowDifficultyMenu();
   drawFrame();
 }
 
@@ -145,7 +187,10 @@ function endGame(victory) {
   state.running = false;
   state.gameOver = !victory;
   state.victory = victory;
+  state.attempts += 1;
   overlay.classList.remove('hidden');
+  updateDifficultyLabel();
+  maybeShowDifficultyMenu();
   if (victory) {
     overlayTitle.textContent = 'Félicitations !';
     overlayText.textContent = `La lettre secrète est le "O" !`;
@@ -159,9 +204,9 @@ function endGame(victory) {
 
 function spawnObstacle() {
   const groundY = getCanvasHeight() - 24;
-  const hardMode = state.score >= 10;
-  const difficultyScore = Math.min(state.score, 18);
-  const isBird = hardMode && Math.random() < 0.72;
+  const easyMode = state.mode === 'easy';
+  const difficultyScore = Math.min(state.score, easyMode ? 10 : 18);
+  const isBird = !easyMode && state.score >= 10 && Math.random() < 0.72;
 
   if (isBird) {
     const height = 22;
@@ -186,10 +231,10 @@ function spawnObstacle() {
     });
   }
 
-  const gapReduction = Math.min(difficultyScore * 10, 380);
-  const minGap = hardMode ? 28 : 40;
-  const gapOffset = hardMode ? 140 : 0;
-  const gap = Math.max(minGap, 1000 - gapReduction + Math.random() * 360 - gapOffset);
+  const gapReduction = easyMode ? Math.min(difficultyScore * 6, 220) : Math.min(difficultyScore * 10, 380);
+  const minGap = easyMode ? 50 : 28;
+  const gapBase = easyMode ? 1100 : 1000;
+  const gap = Math.max(minGap, gapBase - gapReduction + Math.random() * 360 + (easyMode ? 60 : 0));
   state.nextObstacleAt = state.distance + gap;
 }
 
@@ -218,9 +263,10 @@ function update(seconds) {
   state.score += seconds;
   const delta = seconds * 60;
   state.distance += state.speed * delta;
-  const difficultyScore = Math.min(state.score, 18);
-  const speedBoost = Math.min(Math.floor(difficultyScore * 0.55), 10);
-  const hardModeBoost = difficultyScore >= 10 ? Math.min(Math.floor((difficultyScore - 10) * 0.7), 8) : 0;
+  const easyMode = state.mode === 'easy';
+  const difficultyScore = Math.min(state.score, easyMode ? 10 : 18);
+  const speedBoost = Math.min(Math.floor(difficultyScore * (easyMode ? 0.45 : 0.55)), 10);
+  const hardModeBoost = !easyMode && difficultyScore >= 10 ? Math.min(Math.floor((difficultyScore - 10) * 0.7), 8) : 0;
   state.speed = state.baseSpeed + speedBoost + hardModeBoost;
   if (state.score >= env.TARGET_SCORE && !state.victory) {
     endGame(true);
@@ -445,6 +491,9 @@ startBtn.addEventListener('click', () => {
   if (state.gameOver || state.victory) resetGame();
   startGame();
 });
+
+easyBtn.addEventListener('click', () => handleDifficultySelection('easy'));
+hardBtn.addEventListener('click', () => handleDifficultySelection('difficult'));
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupCanvas();
