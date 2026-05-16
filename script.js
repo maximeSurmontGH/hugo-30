@@ -159,12 +159,14 @@ function endGame(victory) {
 
 function spawnObstacle() {
   const groundY = getCanvasHeight() - 24;
-  const isBird = state.score >= 10 && Math.random() < 0.56;
+  const hardMode = state.score >= 10;
+  const difficultyScore = Math.min(state.score, 18);
+  const isBird = hardMode && Math.random() < 0.72;
 
   if (isBird) {
     const height = 22;
     const width = 36;
-    const y = groundY - 90 - Math.random() * 40;
+    const y = groundY - 70 - Math.random() * 28;
     state.obstacles.push({
       x: getCanvasWidth() + 20,
       y,
@@ -184,9 +186,10 @@ function spawnObstacle() {
     });
   }
 
-  const gapReduction = Math.min(state.score * 8, 320);
-  const minGap = 40;
-  const gap = Math.max(minGap, 1000 - gapReduction + Math.random() * 360);
+  const gapReduction = Math.min(difficultyScore * 10, 380);
+  const minGap = hardMode ? 28 : 40;
+  const gapOffset = hardMode ? 140 : 0;
+  const gap = Math.max(minGap, 1000 - gapReduction + Math.random() * 360 - gapOffset);
   state.nextObstacleAt = state.distance + gap;
 }
 
@@ -215,8 +218,10 @@ function update(seconds) {
   state.score += seconds;
   const delta = seconds * 60;
   state.distance += state.speed * delta;
-  const speedBoost = Math.min(Math.floor(state.score * 0.55), 10);
-  state.speed = state.baseSpeed + speedBoost;
+  const difficultyScore = Math.min(state.score, 18);
+  const speedBoost = Math.min(Math.floor(difficultyScore * 0.55), 10);
+  const hardModeBoost = difficultyScore >= 10 ? Math.min(Math.floor((difficultyScore - 10) * 0.7), 8) : 0;
+  state.speed = state.baseSpeed + speedBoost + hardModeBoost;
   if (state.score >= env.TARGET_SCORE && !state.victory) {
     endGame(true);
     return;
