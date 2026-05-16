@@ -10,6 +10,7 @@ const difficultyLabel = document.getElementById('difficulty');
 const difficultyMenu = document.getElementById('difficultyMenu');
 const difficultySwitch = document.getElementById('difficultySwitch');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
+const gamePanel = document.getElementById('gamePanel');
 
 const DEFAULT_RETRY_BEFORE_EASY = 3;
 const sprite = new Image();
@@ -512,6 +513,13 @@ window.addEventListener('keydown', (event) => {
 });
 
 canvas.addEventListener('pointerdown', () => jump());
+if (gamePanel) {
+  gamePanel.addEventListener('pointerdown', (event) => {
+    const target = event.target;
+    if (target.closest('button, input, .hud-button')) return;
+    jump();
+  });
+}
 startBtn.addEventListener('click', () => {
   if (state.gameOver || state.victory) resetGame();
   startGame();
