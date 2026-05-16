@@ -11,6 +11,25 @@ const sprite = new Image();
 sprite.src = 'sprit.png';
 sprite.onload = () => drawFrame();
 
+function getTheme() {
+  return {
+    sky: '#ffffff',
+    ground: '#555',
+    groundLine: '#cfcfcf',
+    cloud: '#ececec',
+    obstacle: '#333',
+    obstacleAccent: '#222',
+    dinoFill: '#1a1a1a',
+    dinoEye: '#f7f7f7',
+    hintBg: 'rgba(0,0,0,0.08)',
+    hintText: '#333',
+  };
+}
+
+function updateTheme() {
+  // kept for API compatibility; no global neon theme anymore
+}
+
 let env = { TARGET_SCORE: 30 };
 let state = {
   running: false,
@@ -152,7 +171,9 @@ function spawnObstacle() {
     height,
   });
   const gapReduction = Math.min(state.score * 8, 320);
-  state.nextObstacleAt = state.distance + 1000 - gapReduction + Math.random() * 360;
+  const minGap = 40;
+  const gap = Math.max(minGap, 1000 - gapReduction + Math.random() * 360);
+  state.nextObstacleAt = state.distance + gap;
 }
 
 function jump() {
@@ -178,6 +199,7 @@ function loop(timestamp) {
 
 function update(seconds) {
   state.score += seconds;
+  updateTheme();
   const delta = seconds * 60;
   state.distance += state.speed * delta;
   const speedBoost = Math.min(Math.floor(state.score * 0.55), 10);
@@ -193,7 +215,7 @@ function update(seconds) {
     state.dino.frameIndex = (state.dino.frameIndex + 1) % 4;
   }
 
-  if (state.distance > state.nextObstacleAt) spawnObstacle();
+  while (state.distance > state.nextObstacleAt) spawnObstacle();
   if (Math.random() < 0.01 * delta) {
     state.clouds.push({ x: getCanvasWidth() + 40, y: 20 + Math.random() * 60 });
   }
@@ -251,32 +273,40 @@ function collides(dino, obs) {
 function drawFrame() {
   const width = getCanvasWidth();
   const height = getCanvasHeight();
+  const theme = getTheme();
   ctx.clearRect(0, 0, width, height);
-  drawSky(width, height);
-  drawGround(width, height);
-  drawClouds();
-  drawObstacles();
-  drawDino();
-  if (!state.running) drawStartHint(width, height);
+  drawSky(width, height, theme);
+  drawGround(width, height, theme);
+  drawClouds(theme);
+  drawObstacles(theme);
+  drawDino(theme);
+  if (!state.running) drawStartHint(width, height, theme);
+  // clignotement après 25s : masquer / afficher le canvas
+  if (state.score >= 25) {
+    const blinkOn = Math.sin(state.score * 6) > 0;
+    canvas.style.visibility = blinkOn ? 'visible' : 'hidden';
+  } else {
+    canvas.style.visibility = 'visible';
+  }
 }
 
-function drawSky(width, height) {
-  ctx.fillStyle = '#f3f3f3';
+function drawSky(width, height, theme) {
+  ctx.fillStyle = theme.sky;
   ctx.fillRect(0, 0, width, height);
 }
 
-function drawGround(width, height) {
+function drawGround(width, height, theme) {
   const y = height - 24;
-  ctx.fillStyle = '#555';
+  ctx.fillStyle = theme.ground;
   ctx.fillRect(0, y, width, 4);
-  ctx.fillStyle = '#cfcfcf';
+  ctx.fillStyle = theme.groundLine;
   for (let i = 0; i < width; i += 24) {
     ctx.fillRect(i + (state.distance / 12 % 24), y, 12, 4);
   }
 }
 
-function drawClouds() {
-  ctx.fillStyle = '#ececec';
+function drawClouds(theme) {
+  ctx.fillStyle = theme.cloud;
   state.clouds.forEach((cloud) => {
     ctx.beginPath();
     ctx.arc(cloud.x, cloud.y, 10, 0, Math.PI * 2);
@@ -286,8 +316,8 @@ function drawClouds() {
   });
 }
 
-function drawObstacles() {
-  ctx.fillStyle = '#333';
+function drawObstacles(theme) {
+  ctx.fillStyle = theme.obstacle;
   state.obstacles.forEach((obs) => {
     ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 
@@ -307,8 +337,10 @@ function drawObstacles() {
       ctx.fill();
     };
     const baseRadius = 6;
+    ctx.fillStyle = theme.obstacleAccent;
     drawRoundedRect(obs.x - 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
     drawRoundedRect(obs.x + obs.width - baseSquareSize + 15, baseSquareY, baseSquareSize, baseSquareSize, baseRadius);
+    ctx.fillStyle = theme.obstacle;
 
     const topSquareSize = obs.width + 8;
     const topSquareX = obs.x - 4;
@@ -335,7 +367,7 @@ function drawObstacles() {
   });
 }
 
-function drawDino() {
+function drawDino(theme) {
   const d = state.dino;
   const sourceSet = state.dino.grounded ? (state.running ? 'run' : 'idle') : 'jump';
   const frame = state.dino.spriteSets[sourceSet][state.dino.frameIndex];
@@ -343,9 +375,9 @@ function drawDino() {
     ctx.drawImage(sprite, frame.x, frame.y, frame.w, frame.h, d.x, d.y, d.width, d.height);
     return;
   }
-  ctx.fillStyle = '#1a1a1a';
+  ctx.fillStyle = theme.dinoFill;
   ctx.fillRect(d.x, d.y, d.width, d.height);
-  ctx.fillStyle = '#f7f7f7';
+  ctx.fillStyle = theme.dinoEye;
   ctx.fillRect(d.x + 8, d.y + 10, 8, 8);
   ctx.fillRect(d.x + 28, d.y + 8, 8, 8);
   const legOffset = Math.sin(state.score / 7) * 4;
@@ -353,14 +385,16 @@ function drawDino() {
   ctx.fillRect(d.x + 26, d.y + d.height - 5 + (state.dino.grounded ? legOffset : 0), 10, 5);
 }
 
-function drawStartHint(width, height) {
-  ctx.fillStyle = 'rgba(0,0,0,0.08)';
+function drawStartHint(width, height, theme) {
+  ctx.fillStyle = theme.hintBg;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = '#333';
+  ctx.fillStyle = theme.hintText;
   ctx.font = '600 18px Inter, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Touchez l’écran ou appuyez sur ESPACE pour commencer', width / 2, height / 2 + 8);
 }
+
+// drawBlink removed: blinking now toggles canvas visibility in drawFrame
 
 window.addEventListener('resize', () => {
   setupCanvas();
