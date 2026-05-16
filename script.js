@@ -366,13 +366,14 @@ function drawFrame() {
   drawObstacles(theme);
   drawDino(theme);
   if (!state.running) drawStartHint(width, height, theme);
-  // clignotement après 25s : masquer / afficher le canvas
-  if (state.score >= 25) {
-    const blinkOn = Math.sin(state.score * 6) > 0;
-    canvas.style.visibility = blinkOn ? 'visible' : 'hidden';
-  } else {
-    canvas.style.visibility = 'visible';
-  }
+  // clignotement après 25s : désactivé pour le moment
+  // // clignotement après 25s : masquer / afficher le canvas
+  // if (state.score >= 25) {
+  //   const blinkOn = Math.sin(state.score * 6) > 0;
+  //   canvas.style.visibility = blinkOn ? 'visible' : 'hidden';
+  // } else {
+  canvas.style.visibility = 'visible';
+  // }
 }
 
 function drawSky(width, height, theme) {
