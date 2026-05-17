@@ -17,6 +17,11 @@ const gameSong = new Audio('game-song.mp3');
 gameSong.preload = 'auto';
 gameSong.volume = 0.5;
 gameSong.loop = true;
+const jumpSound = new Audio('jump.mp3');
+jumpSound.preload = 'auto';
+jumpSound.volume = 0.3;
+const boomSound = new Audio('boum.mp3');
+boomSound.preload = 'auto';
 
 const DEFAULT_RETRY_BEFORE_EASY = 3;
 const sprite = new Image();
@@ -221,6 +226,12 @@ function startGame() {
 function endGame(victory) {
   gameSong.pause();
   gameSong.currentTime = 0;
+  if (!victory) {
+    boomSound.currentTime = 0;
+    boomSound.play().catch(() => {
+      // Ignore playback errors if browser requires a user gesture.
+    });
+  }
   state.running = false;
   state.gameOver = !victory;
   state.victory = victory;
@@ -284,6 +295,10 @@ function jump() {
     startGame();
   }
   if (state.dino.grounded) {
+    jumpSound.currentTime = 0;
+    jumpSound.play().catch(() => {
+      // Ignore playback errors if browser requires a user gesture.
+    });
     state.dino.velY = -state.dino.jumpPower;
     state.dino.grounded = false;
   }
