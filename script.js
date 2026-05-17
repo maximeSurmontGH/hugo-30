@@ -11,6 +11,12 @@ const difficultyMenu = document.getElementById('difficultyMenu');
 const difficultySwitch = document.getElementById('difficultySwitch');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 const gamePanel = document.getElementById('gamePanel');
+const easyModeSound = new Audio('easy-mode.mp3');
+easyModeSound.preload = 'auto';
+const gameSong = new Audio('game-song.mp3');
+gameSong.preload = 'auto';
+gameSong.volume = 0.5;
+gameSong.loop = true;
 
 const DEFAULT_RETRY_BEFORE_EASY = 3;
 const sprite = new Image();
@@ -160,10 +166,17 @@ function maybeShowDifficultyMenu() {
 }
 
 function handleDifficultySelection(choice) {
+  const switchedToEasy = choice === 'easy' && state.mode !== 'easy';
   state.mode = choice;
   updateDifficultyLabel();
   if (difficultySwitch) {
     difficultySwitch.checked = state.mode === 'easy';
+  }
+  if (switchedToEasy) {
+    easyModeSound.currentTime = 0;
+    easyModeSound.play().catch(() => {
+      // Ignore play errors; user gesture may be required in some browsers.
+    });
   }
 }
 
@@ -198,10 +211,16 @@ function startGame() {
   state.running = true;
   state.lastTime = performance.now();
   overlay.classList.add('hidden');
+  gameSong.currentTime = 0;
+  gameSong.play().catch(() => {
+    // Ignore playback errors if browser requires a gesture.
+  });
   requestAnimationFrame(loop);
 }
 
 function endGame(victory) {
+  gameSong.pause();
+  gameSong.currentTime = 0;
   state.running = false;
   state.gameOver = !victory;
   state.victory = victory;
